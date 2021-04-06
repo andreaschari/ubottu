@@ -70,13 +70,16 @@ print 'loaded val data!'
 test_C, test_R, test_Y = load_data(test_file_df)
 print 'loaded test data!'
 
-for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', 'flag'], chunksize=10000) :
+chunk = 0
+
+for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', 'flag'], chunksize=30000) :
+    # replace empty values with space
     train_file_chunk = train_file_chunk.fillna(' ')
     train_C, train_R, train_Y = load_data(train_file_chunk)
-    print 'loaded train file batch!'
+    print 'loaded train file batch ', chunk  
     
     vectorizer = TfidfVectorizer()
-    print 'training Vectorizer'
+    print 'training tf-idf baseline'
     vectorizer.fit(train_C+train_R+val_C+val_R)
     
     C_vec = vectorizer.transform(test_C)
@@ -86,4 +89,5 @@ for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', '
     for group_size in [2, 10]:
         run(C_vec, R_vec, Y, group_size)
 
+    chunk += 1
 print 'DONE!'
