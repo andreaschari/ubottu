@@ -51,12 +51,10 @@ def run(C_vec, R_vec, Y, group_size):
     print classification_report(YY, pred)
     
 def load_data(dataframe):
-    C = dataframe['context'].to_list()
-    R = dataframe['response'].to_list()
-    # need to also convert flag to int
-    Y = res = list(map(int, dataframe['flag'].to_list()))
-
-    return C, R, Y
+    '''
+    return lists of context, response and flag
+    '''
+    return  dataframe['context'].to_list(), dataframe['response'].to_list(), list(map(int, dataframe['flag'].to_list()))
 
 val_file_df = pd.read_csv(VAL_FILE, names=['context', 'response', 'flag'])
 test_file_df = pd.read_csv(TEST_FILE,  names=['context', 'response', 'flag'])
@@ -72,7 +70,7 @@ print 'loaded test data!'
 
 chunk = 0
 
-for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', 'flag'], chunksize=30000) :
+for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', 'flag'], chunksize=50000) :
     # replace empty values with space
     train_file_chunk = train_file_chunk.fillna(' ')
     train_C, train_R, train_Y = load_data(train_file_chunk)
@@ -85,7 +83,7 @@ for train_file_chunk in pd.read_csv(TRAIN_FILE,  names=['context', 'response', '
     C_vec = vectorizer.transform(test_C)
     R_vec = vectorizer.transform(test_R)
     Y = np.array(test_Y)
-    
+    print 'running evaluation'
     for group_size in [2, 10]:
         run(C_vec, R_vec, Y, group_size)
 
